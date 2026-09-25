@@ -11,29 +11,91 @@ BarWidget {
     readonly property int slotCount: Math.max(1, Math.min(10, Number(setting("workspaceCount", 10)) || 10))
     readonly property var monitors: Hyprland.monitors.values
     readonly property var workspaces: Hyprland.workspaces.values
-    readonly property var customLabels: {
-        try {
-            var parsed = JSON.parse(String(setting("monitorLabels", "{}")))
-            return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : ({})
-        } catch (error) {
-            return ({})
+    readonly property var customLabels: objectSetting("monitorLabels")
+    readonly property var customColors: objectSetting("monitorColors")
+    readonly property var customWorkspaceLabels: objectSetting("workspaceLabels")
+    readonly property var colorPalettes: ({
+        pastel: ["#89B4FA", "#F38BA8", "#A6E3A1", "#CBA6F7", "#F9E2AF", "#94E2D5"],
+        neon: ["#00E5FF", "#FF2E97", "#B7FF00", "#BF5AF2", "#FF9F0A", "#00D084"],
+        warm: ["#E76F51", "#2A9D8F", "#E9C46A", "#D78A76", "#CC7BBA", "#8AB17D"],
+        nord: ["#88C0D0", "#BF616A", "#A3BE8C", "#B48EAD", "#EBCB8B", "#81A1C1"],
+        monochrome: ["#E5E7EB", "#BFC5CE", "#9CA3AF", "#D1D5DB", "#A1A1AA", "#F4F4F5"]
+    })
+
+    function objectSetting(key) {
+        var value = setting(key, ({}))
+        if (typeof value === "string") {
+            try {
+                value = JSON.parse(value)
+            } catch (error) {
+                return ({})
+            }
         }
+        return value && typeof value === "object" && !Array.isArray(value) ? value : ({})
+    }
+
+    function isLaptopMonitor(monitor) {
+        return !!monitor && /^(eDP|LVDS|DSI)/i.test(String(monitor.name))
+    }
+
+    function externalMonitorNumber(monitor) {
+        var number = 0
+        for (var i = 0; i < monitors.length; i++) {
+            if (isLaptopMonitor(monitors[i])) continue
+            number++
+            if (String(monitors[i].name) === String(monitor.name)) return number
+        }
+        return Math.max(1, number)
+    }
+
+    function monitorRole(monitor) {
+        return isLaptopMonitor(monitor) ? "Notebook" : "Monitor " + externalMonitorNumber(monitor)
     }
 
     function displayName(monitor) {
         if (!monitor) return "?"
+
         var configured = customLabels[String(monitor.name)]
         if (configured !== undefined && String(configured).trim() !== "")
             return String(configured).trim()
-        if (/^(eDP|LVDS|DSI)/i.test(String(monitor.name))) return "Laptop"
 
-        var externalIndex = 0
+        var style = String(setting("monitorLabelStyle", "short")).toLowerCase()
+        if (style === "output") return String(monitor.name)
+        if (style === "full") return monitorRole(monitor)
+        return isLaptopMonitor(monitor) ? "NB" : "M" + externalMonitorNumber(monitor)
+    }
+
+    function monitorIndex(monitor) {
         for (var i = 0; i < monitors.length; i++) {
-            if (/^(eDP|LVDS|DSI)/i.test(String(monitors[i].name))) continue
-            externalIndex++
-            if (monitors[i].name === monitor.name) break
+            if (String(monitors[i].name) === String(monitor.name)) return i
         }
-        return monitors.length === 1 ? "Monitor" : "Monitor " + externalIndex
+        return 0
+    }
+
+    function isHexColor(value) {
+        return /^#[0-9A-Fa-f]{6}$/.test(String(value || "").trim())
+    }
+
+    function monitorColor(monitor) {
+        if (!monitor) return "#89B4FA"
+
+        var configured = customColors[String(monitor.name)]
+        if (isHexColor(configured)) return String(configured).trim()
+
+        var theme = String(setting("monitorColorTheme", "Pastel")).toLowerCase()
+        var palette = colorPalettes[theme] || colorPalettes.pastel
+        return palette[monitorIndex(monitor) % palette.length]
+    }
+
+    function workspaceLabel(slot) {
+        var configured = customWorkspaceLabels[String(slot)]
+        if (configured !== undefined && String(configured).trim() !== "")
+            return String(configured).trim()
+        return slot === 10 ? "0" : String(slot)
+    }
+
+    function workspaceKey(slot) {
+        return slot === 10 ? "0" : String(slot)
     }
 
     function encodedMonitorName(name) {
@@ -85,15 +147,16 @@ BarWidget {
     }
 
     function workspaceTooltip(monitor, slot, workspace) {
-        var key = slot === 10 ? "0" : String(slot)
-        var lines = [displayName(monitor) + " · " + String(monitor.name), "Workspace " + slot]
+        var alias = String(customWorkspaceLabels[String(slot)] || "").trim()
+        var title = "Workspace " + slot + (alias ? " · " + String(alias) : "")
+        var lines = [displayName(monitor) + " · " + monitorRole(monitor) + " · " + String(monitor.name), title]
         if (workspace) {
             var windowCount = workspace.toplevels.values.length
             lines.push(windowCount === 1 ? "1 janela" : windowCount + " janelas")
         } else {
             lines.push("Vazio; será criado neste monitor")
         }
-        lines.push("Clique para alternar · Super+" + key + " (com integração de teclado)")
+        lines.push("Clique para alternar · Super+" + workspaceKey(slot) + " com integração de teclado")
         return lines.join("\n")
     }
 
@@ -122,13 +185,14 @@ BarWidget {
                     Layout.row: 0
                     Layout.column: 0
                     bar: root.bar
-                    text: root.vertical ? String(monitorGroup.modelData.name).slice(0, 1).toUpperCase()
-                        : root.displayName(monitorGroup.modelData)
+                    text: root.displayName(monitorGroup.modelData)
                     fontSize: Style.font.bodySmall
                     horizontalMargin: 4
                     verticalPadding: 4
                     active: !!monitorGroup.modelData.focused
+                    activeColor: root.monitorColor(monitorGroup.modelData)
                     tooltipText: root.displayName(monitorGroup.modelData) + " · "
+                        + root.monitorRole(monitorGroup.modelData) + " · "
                         + String(monitorGroup.modelData.name)
                         + (monitorGroup.modelData.focused ? "\nFoco do teclado aqui" : "\nClique para focar este monitor")
                     onPressed: function(button) {
@@ -153,12 +217,13 @@ BarWidget {
                         Layout.row: root.vertical ? slot : 0
                         Layout.column: root.vertical ? 0 : slot
                         bar: root.bar
-                        text: slot === 10 ? "0" : String(slot)
+                        text: root.workspaceLabel(slot)
                         fontSize: Style.font.body
                         horizontalMargin: 5
                         verticalPadding: 4
                         dimmed: !occupied && !selected
                         active: selected
+                        activeColor: root.monitorColor(monitorGroup.modelData)
                         tooltipText: root.workspaceTooltip(monitorGroup.modelData, slot, workspace)
                         onPressed: function(button) {
                             if (button === Qt.LeftButton)

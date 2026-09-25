@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "kauanmassuia14.omaspacetor",
   "name": "OmaSpaceTor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "kauanmassuia14",
   "license": "MIT",
-  "description": "Shows independent numbered workspaces for each monitor.",
+  "description": "Independent, colorful workspaces for every monitor.",
   "kinds": [
     "bar-widget"
   ],
@@ -14,31 +14,65 @@
   },
   "barWidget": {
     "displayName": "OmaSpaceTor",
-    "description": "Numbered workspace slots grouped by monitor.",
+    "description": "Monitor-aware workspaces with custom labels, aliases, and colors.",
     "category": "Compositor",
     "allowMultiple": false,
     "defaultSection": "left",
     "defaults": {
       "workspaceCount": 10,
-      "monitorLabels": "{}"
+      "monitorLabelStyle": "short",
+      "monitorLabels": "{}",
+      "monitorColorTheme": "Pastel",
+      "monitorColors": "{}",
+      "workspaceLabels": "{}"
     },
     "schema": [
       {
         "key": "workspaceCount",
         "type": "integer",
-        "label": "Workspace slots per monitor",
+        "label": "Workspaces per monitor",
         "min": 1,
         "max": 10,
         "step": 1,
         "defaultValue": 10,
-        "description": "Numbered slots available on each monitor. Slot 10 uses Super+0."
+        "description": "Number of workspace slots on each monitor. Slot 10 uses Super+0."
+      },
+      {
+        "key": "monitorLabelStyle",
+        "type": "enum",
+        "label": "Automatic monitor labels",
+        "options": ["short", "full", "output"],
+        "defaultValue": "short",
+        "description": "Use NB/M1, Notebook/Monitor 1, or the output name. Custom labels take priority."
       },
       {
         "key": "monitorLabels",
         "type": "string",
-        "label": "Monitor labels",
+        "label": "Monitor labels (JSON)",
         "defaultValue": "{}",
-        "description": "Optional JSON object mapping Hyprland output names to short labels, e.g. {\"eDP-1\":\"NB\",\"DP-1\":\"EXT\"}."
+        "description": "Map Hyprland output names to short labels, e.g. {\"eDP-1\":\"NB\",\"DP-1\":\"EXT\"}."
+      },
+      {
+        "key": "monitorColorTheme",
+        "type": "enum",
+        "label": "Monitor color palette",
+        "options": ["Pastel", "Neon", "Warm", "Nord", "Monochrome"],
+        "defaultValue": "Pastel",
+        "description": "Choose a palette; assign exact colors to outputs with monitorColors."
+      },
+      {
+        "key": "monitorColors",
+        "type": "string",
+        "label": "Monitor colors (JSON)",
+        "defaultValue": "{}",
+        "description": "Map output names to custom #RRGGBB colors, e.g. {\"eDP-1\":\"#89B4FA\"}."
+      },
+      {
+        "key": "workspaceLabels",
+        "type": "string",
+        "label": "Workspace labels (JSON)",
+        "defaultValue": "{}",
+        "description": "Map slot numbers to names, e.g. {\"1\":\"DEV\",\"2\":\"WEB\"}. Keyboard shortcuts still use numbers."
       }
     ]
   }

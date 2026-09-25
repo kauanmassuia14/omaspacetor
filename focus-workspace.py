@@ -5,14 +5,38 @@ import json
 import re
 import subprocess
 import sys
+from pathlib import Path
 from urllib.parse import quote
 
 
 PLUGIN_PREFIX = "omaspacetor:"
+PLUGIN_ID = "kauanmassuia14.omaspacetor"
 
 
 def hyprctl_json(kind):
     return json.loads(subprocess.check_output(["hyprctl", "-j", kind], text=True))
+
+
+def configured_workspace_count():
+    """Read this widget's visible slot count, falling back safely to ten."""
+    config_path = Path.home() / ".config/omarchy/shell.json"
+    try:
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        layout = config.get("bar", {}).get("layout", {})
+        for section in ("left", "center", "right"):
+            entries = layout.get(section, [])
+            if not isinstance(entries, list):
+                continue
+            for entry in entries:
+                if not isinstance(entry, dict) or entry.get("id") != PLUGIN_ID:
+                    continue
+                count = entry.get("workspaceCount", 10)
+                if isinstance(count, int) and not isinstance(count, bool):
+                    return max(1, min(10, count))
+                return 10
+    except (OSError, json.JSONDecodeError, AttributeError, TypeError):
+        pass
+    return 10
 
 
 def main():
@@ -21,6 +45,14 @@ def main():
         return 2
 
     slot = int(sys.argv[1])
+    slot_count = configured_workspace_count()
+    if slot > slot_count:
+        print(
+            f"OmaSpaceTor: this widget is configured for {slot_count} workspace slot(s).",
+            file=sys.stderr,
+        )
+        return 2
+
     monitors = hyprctl_json("monitors")
     focused = next((monitor for monitor in monitors if monitor.get("focused")), None)
     if not focused:
