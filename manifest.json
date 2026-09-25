@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "kauanmassuia14.omaspacetor",
+  "name": "OmaSpaceTor",
+  "version": "0.1.0",
+  "author": "kauanmassuia14",
+  "license": "MIT",
+  "description": "Shows independent numbered workspaces for each monitor.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "OmaSpaceTor",
+    "description": "Numbered workspace slots grouped by monitor.",
+    "category": "Compositor",
+    "allowMultiple": false,
+    "defaultSection": "left",
+    "defaults": {
+      "workspaceCount": 10,
+      "monitorLabels": "{}"
+    },
+    "schema": [
+      {
+        "key": "workspaceCount",
+        "type": "integer",
+        "label": "Workspace slots per monitor",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "defaultValue": 10,
+        "description": "Numbered slots available on each monitor. Slot 10 uses Super+0."
+      },
+      {
+        "key": "monitorLabels",
+        "type": "string",
+        "label": "Monitor labels",
+        "defaultValue": "{}",
+        "description": "Optional JSON object mapping Hyprland output names to short labels, e.g. {\"eDP-1\":\"NB\",\"DP-1\":\"EXT\"}."
+      }
+    ]
+  }
+}
