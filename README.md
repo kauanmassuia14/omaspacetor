@@ -12,11 +12,11 @@ Um seletor de workspaces para a barra do Omarchy, com foco por monitor, atalhos 
 
 ## A ideia em 10 segundos
 
-Com a integração de teclado ativada, `Super+4` abre o workspace 4 **no monitor que está com o foco do teclado**. Se o monitor externo estiver em foco, o mesmo atalho escolhe o 4 dele. O workspace aberto na outra tela continua lá.
+Com a integração de teclado ativada, `Super+4` abre o slot 4 no notebook (`NB`) e `Super+Ctrl+4` abre o slot 4 no primeiro monitor externo (`M1`). Cada atalho funciona mesmo quando o foco está na outra tela.
 
 No Hyprland, workspaces numéricos como `1` e `2` são globais. Quando um número já pertence a outro monitor, o OmaSpaceTor cria um workspace local nomeado para manter um slot independente em cada tela. Workspaces numéricos existentes no monitor certo são reaproveitados.
 
-> A imagem é uma simulação: `Super+4` está com o notebook em foco. O monitor externo conserva seu próprio workspace.
+> A imagem é uma simulação; o notebook e o monitor externo conservam seus próprios workspaces.
 
 ## O que aparece na barra
 
@@ -31,14 +31,14 @@ No Hyprland, workspaces numéricos como `1` e `2` são globais. Quando um númer
 
 Clique na sigla para focar o monitor. Clique em um slot para abrir aquele workspace nele. O slot 10 aparece como `0`, acompanhando o padrão `Super+0`.
 
-## Simulação do atalho
+## Atalhos por monitor
 
 Imagine o notebook em `eDP-1` e uma tela externa em `DP-1`:
 
-| Foco do teclado | Atalho | Resultado | A outra tela |
+| Tela escolhida | Atalho | Resultado | A outra tela |
 | --- | --- | --- | --- |
-| Notebook (`eDP-1`) | `Super+4` | Abre o slot 4 no notebook | Continua no workspace atual |
-| Monitor (`DP-1`) | `Super+4` | Abre o slot 4 no monitor externo | Continua no workspace atual |
+| Notebook (`eDP-1`, `NB`) | `Super+4` | Abre o slot 4 no notebook | Continua no workspace atual |
+| Monitor externo (`DP-1`, `M1`) | `Super+Ctrl+4` | Abre o slot 4 no monitor externo | Continua no workspace atual |
 
 Se o workspace numérico `4` já estiver nesse monitor, ele é usado. Se estiver em outra tela, o OmaSpaceTor cria um workspace local para aquele monitor e mantém o `4` original intacto.
 
@@ -60,9 +60,9 @@ omarchy plugin list
 omarchy plugin enable kauanmassuia14.omaspacetor left
 ```
 
-## Ativar `Super+1` até `Super+0`
+## Ativar atalhos separados por monitor
 
-O widget funciona por clique sem tocar nos atalhos atuais. A integração abaixo é opcional; ela substitui `Super+1` até `Super+0` para escolher o slot no monitor em foco:
+O widget funciona por clique sem tocar nos atalhos atuais. A integração abaixo é opcional. Ela configura `Super+1` até `Super+0` para o notebook (`NB`) e `Super+Ctrl+1` até `Super+Ctrl+0` para o primeiro monitor externo (`M1`):
 
 1. Abra `~/.config/hypr/bindings.lua`.
 2. Adicione esta linha depois dos binds padrão do Omarchy:
@@ -77,7 +77,7 @@ O widget funciona por clique sem tocar nos atalhos atuais. A integração abaixo
    hyprctl reload
    ```
 
-`Super+Shift+1` até `Super+Shift+0` continuam com os binds padrão para mover janelas. Se o OmaSpaceTor estiver configurado com menos slots, os atalhos acima desse limite não abrem slots escondidos.
+Os atalhos `Super+Ctrl+1` até `Super+Ctrl+0` passam a selecionar workspaces no M1. `Super+Shift+1` até `Super+Shift+0` continuam movendo janelas normalmente. Se o OmaSpaceTor estiver configurado com menos slots, os atalhos acima desse limite não abrem slots escondidos.
 
 Para desfazer a integração, remova a linha `dofile` e rode `hyprctl reload` novamente.
 
@@ -129,8 +129,8 @@ rsync -a --delete --exclude=.git ./ ~/.config/omarchy/plugins/kauanmassuia14.oma
 1. Confira o manifesto: `omarchy plugin validate ~/.config/omarchy/plugins/kauanmassuia14.omaspacetor`.
 2. Conecte duas telas e rode `hyprctl monitors` para descobrir os nomes, por exemplo `eDP-1` e `DP-1`.
 3. Confirme que os dois grupos aparecem na barra, com `NB` e `M1`.
-4. Clique em `M1` e use `Super+4`: o workspace 4 deve abrir no monitor externo.
-5. Volte ao notebook e use `Super+4`: o 4 do notebook fica ativo sem trocar o workspace atual do monitor externo.
+4. Use `Super+Ctrl+4`: o workspace 4 deve abrir no monitor externo, mesmo se o foco estava no notebook.
+5. Use `Super+4`: o workspace 4 do notebook fica ativo sem trocar o workspace atual do monitor externo.
 6. Altere `monitorColors` e `workspaceLabels` no `shell.json` para conferir suas cores e nomes.
 
 Se você editar o código deste repositório em vez da cópia instalada, sincronize os arquivos do plugin para `~/.config/omarchy/plugins/kauanmassuia14.omaspacetor/`. Alterações salvas na pasta instalada recarregam automaticamente.

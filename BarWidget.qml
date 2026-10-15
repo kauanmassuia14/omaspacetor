@@ -156,7 +156,12 @@ BarWidget {
         } else {
             lines.push("Vazio; será criado neste monitor")
         }
-        lines.push("Clique para alternar · Super+" + workspaceKey(slot) + " com integração de teclado")
+        var shortcut = isLaptopMonitor(monitor)
+            ? "Super+" + workspaceKey(slot)
+            : (externalMonitorNumber(monitor) === 1
+                ? "Super+Ctrl+" + workspaceKey(slot)
+                : "")
+        lines.push(shortcut ? "Clique para alternar · " + shortcut : "Clique para alternar")
         return lines.join("\n")
     }
 
