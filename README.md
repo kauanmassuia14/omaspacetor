@@ -64,6 +64,8 @@ omarchy plugin enable kauanmassuia14.omaspacetor left
 
 O widget funciona por clique sem tocar nos atalhos atuais. A integração abaixo é opcional. Ela configura `Super+1` até `Super+0` para o notebook (`NB`) e `Super+Ctrl+1` até `Super+Ctrl+0` para o primeiro monitor externo (`M1`):
 
+Com a integração ativa, `Super+Ctrl+1` até `Super+Ctrl+9` deixam de abrir os painéis correspondentes da barra e passam a selecionar workspaces no M1.
+
 1. Abra `~/.config/hypr/bindings.lua`.
 2. Adicione esta linha depois dos binds padrão do Omarchy:
 

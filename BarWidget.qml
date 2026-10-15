@@ -132,17 +132,26 @@ BarWidget {
         return null
     }
 
+    function focusExpression(property, value) {
+        return "hl.dispatch(hl.dsp.focus({ " + property + " = "
+            + JSON.stringify(String(value)) + " }))"
+    }
+
+    function runFocus(property, value) {
+        return "hyprctl eval " + Util.shellQuote(focusExpression(property, value))
+    }
+
     function focusMonitor(monitor) {
         if (!monitor || !bar) return
-        bar.run("hyprctl dispatch focusmonitor " + Util.shellQuote(String(monitor.name)))
+        bar.run(runFocus("monitor", monitor.name))
     }
 
     function focusWorkspace(monitor, slot) {
         if (!monitor || !bar) return
         var legacy = legacyWorkspace(monitor, slot)
         var target = legacy ? String(slot) : "name:" + localWorkspaceName(monitor, slot)
-        var command = "hyprctl dispatch focusmonitor " + Util.shellQuote(String(monitor.name))
-            + " && hyprctl dispatch workspace " + Util.shellQuote(target)
+        var command = runFocus("monitor", monitor.name)
+            + " && " + runFocus("workspace", target)
         bar.run(command)
     }
 

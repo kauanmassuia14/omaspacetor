@@ -9,7 +9,9 @@ end
 
 local function bindWorkspaceSet(modifiers, monitor)
   for slot = 1, 10 do
-    local key = slot == 10 and "0" or tostring(slot)
+    -- Omarchy registers its digit shortcuts as keycodes (code:10 through
+    -- code:19), so use the same form to unbind the default actions reliably.
+    local key = "code:" .. tostring(slot + 9)
     local binding = modifiers .. " + " .. key
     hl.unbind(binding)
     o.bind(

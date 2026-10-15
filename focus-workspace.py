@@ -17,6 +17,12 @@ def hyprctl_json(kind):
     return json.loads(subprocess.check_output(["hyprctl", "-j", kind], text=True))
 
 
+def focus(option, value):
+    lua_value = json.dumps(value, ensure_ascii=False)
+    expression = f"hl.dispatch(hl.dsp.focus({{ {option} = {lua_value} }}))"
+    subprocess.run(["hyprctl", "eval", expression], check=True)
+
+
 def is_laptop_monitor(monitor):
     return bool(re.match(r"^(eDP|LVDS|DSI)", str(monitor.get("name", "")), re.IGNORECASE))
 
@@ -101,8 +107,8 @@ def main():
         monitor_token = quote(monitor_name, safe="~-._")
         target = "name:" + PLUGIN_PREFIX + monitor_token + ":" + str(slot)
 
-    subprocess.run(["hyprctl", "dispatch", "focusmonitor", monitor_name], check=True)
-    subprocess.run(["hyprctl", "dispatch", "workspace", target], check=True)
+    focus("monitor", monitor_name)
+    focus("workspace", target)
     return 0
 
 
